@@ -1,0 +1,12 @@
+[Desktop Entry]
+Name=Arduino IDE ver 2.3.4
+Comment=Open-source electronics prototyping platform
+GenericName=Arduino IDE
+Exec=/---insert your path here---/arduino-ide
+Icon=/---insert your path here---/arduinoide.png
+Type=Application
+Terminal=false
+Categories=Development;Engineering;Electronics;IDE;
+MimeType=text/x-arduino
+Keywords=embedded electronics;electronics;avr;microcontroller;
+StartupWMClass=Arduino IDE

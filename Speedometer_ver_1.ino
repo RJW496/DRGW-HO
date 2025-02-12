@@ -9,8 +9,8 @@
 #define HO   87.1
 #define OO   96
 #define TT   120
-#define N-UK 148
-#define N-US 160
+#define N_UK 148
+#define N_US 160
 #define Z    220
 
 float scale = HO;             // change HO to your scale
@@ -36,8 +36,8 @@ int distUnits = INCHES;       // select INCHES or CM
 
 int state;
 
-const int leftLED = A0;
-const int rghtLED = A1;
+const unsigned leftLED = A0;
+const unsigned rghtLED = A1;
 
 unsigned long timerStart;
 unsigned long elapsedTime;
@@ -57,31 +57,40 @@ void setup() {
 }
 
 void loop() {
+int newState=state;
+
   switch (state) {
     case ST_READY:
       if (detected(leftLED)) {
         timerStart = millis();
-        state = ST_DETECT_RB;
+        newState = ST_DETECT_RB;
         Serial.println("Detecting...");
       }
       else if (detected(rghtLED)) {
         timerStart = millis();
-        state = ST_DETECT_LB;
+        newState = ST_DETECT_LB;
         Serial.println("Detecting...");
       }
       break;
 
+    case ST_WAITING:
+      if (!detected(leftLED) && !detected(rghtLED)) {
+        newState = ST_READY;
+        Serial.println("Ready...");
+      }
+      break;
+
     case ST_DETECT_LB:
-      if (detected(rghtLED)) {
+      if (detected(leftLED)) {
         elapsedTime = millis() - timerStart;
-        state = ST_CALC;
+        newState = ST_CALC;
       }
       break;
 
     case ST_DETECT_RB:
-      if (detected(leftLED)) {
+      if (detected(rghtLED)) {
         elapsedTime = millis() - timerStart;
-        state = ST_CALC;
+        newState = ST_CALC;
       }
       break;
 
@@ -94,17 +103,14 @@ void loop() {
         Serial.println(" MPH");
       else
         Serial.println(" KPH");
-      state = ST_WAITING;
+      newState = ST_WAITING;
+      Serial.println("Waiting...");
       break;
-
-    case ST_WAITING:
-      if (!detected(leftLED) && !detected(rghtLED)) {
-        state = ST_READY;
-        Serial.println("Ready...");
-      }
   }
+
+  state = newState;
 }
 
-boolean detected(int pin) {
-  if (analogRead(pin)>500) return true; else return false;
+boolean detected(unsigned pin) {
+  return (analogRead(pin)<500);
 }

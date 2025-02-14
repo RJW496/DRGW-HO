@@ -1,5 +1,5 @@
 /*
- *  Speedometer version 1
+ *  Speedometer version 2
  */
 
  //========== Customization ==================================
@@ -41,8 +41,16 @@ unsigned long elapsedTime;
 
 float constant;
 
+// the following lines set up the LCD display
+#include <LiquidCrystal.h>
+// Arduino pin assignments
+const int rs=12, en=11, d4=5, d5=4, d6=3, d7=2;
+LiquidCrystal lcd(rs, en, d4, d5, d6, d7);
+
 void setup() {
-  Serial.begin(9600);
+  delay(1000);
+  lcd.begin(16, 2);
+  lcd.clear();
   pinMode(leftLED,INPUT);
   pinMode(rghtLED,INPUT);
   state = ST_READY;
@@ -71,12 +79,13 @@ int newState=state;
       break;
 
     case ST_WAITING:
-      // force delay of 2 seconds
-      if (millis()-timerStart<2000) return;
+      // for delay of five seconds
+      if (millis()-timerStart<5000) return;
 
       if (!detected(leftLED) && !detected(rghtLED)) {
         newState = ST_READY;
         display("Ready...");
+        clearLine(1);
       }
       break;
 
@@ -111,14 +120,23 @@ boolean detected(unsigned pin) {
 }
 
 void display(char* text) {
-  Serial.println(text);
+  clearLine(0);
+  lcd.print(text);
 }
 
-void display(float speed, float units) {
-  Serial.print("Speed: ");
-  Serial.print(speed,1);
+void display(float val, float units) {
+  clearLine(1);
+  lcd.print("Speed: ");
+  val = int(val*10.) /10.0;
+  lcd.print(val,1);
   if (speedUnits==MPH)
-    Serial.println(" MPH");
+    lcd.print(" MPH");
   else
-    Serial.println(" KPH");
+    lcd.print(" KPH");
+}
+
+void clearLine(int line) {
+  lcd.setCursor(0,line);
+  lcd.print("                ");
+  lcd.setCursor(0,line);
 }

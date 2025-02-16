@@ -20,8 +20,8 @@ float speedUnits = MPH;       // select MPH or KPH
 
 #define INCHES  1
 #define CM      2
-float distance = 8.0;         // enter distance between sensors
-int distUnits = INCHES;       // select INCHES or CM
+float distance = 13.7;        // enter distance between sensors
+int distUnits = CM;           // select INCHES or CM
 
 //=========== End Customization ===============================
 
@@ -78,17 +78,6 @@ int newState=state;
       }
       break;
 
-    case ST_WAITING:
-      // for delay of five seconds
-      if (millis()-timerStart<5000) return;
-
-      if (!detected(leftLED) && !detected(rghtLED)) {
-        newState = ST_READY;
-        display("Ready...");
-        clearLine(1);
-      }
-      break;
-
     case ST_DETECT_LB:
       if (detected(leftLED)) {
         elapsedTime = millis() - timerStart;
@@ -104,12 +93,25 @@ int newState=state;
       break;
 
     case ST_CALC:
+      {
       display("Calculating...");
       float speed = constant / (elapsedTime / 1000. / 3600.);
       display(speed,speedUnits);
       newState = ST_WAITING;
       display("Waiting...");
       timerStart = millis();
+      break;
+      }
+
+    case ST_WAITING:
+      // for delay of five seconds
+      if (millis()-timerStart<5000) return;
+
+      if (!detected(leftLED) && !detected(rghtLED)) {
+        newState = ST_READY;
+        display("Ready...");
+        clearLine(1);
+      }
       break;
   }
   state = newState;
@@ -119,7 +121,7 @@ boolean detected(unsigned pin) {
   return (analogRead(pin)<500);
 }
 
-void display(char* text) {
+void display(const char* text) {
   clearLine(0);
   lcd.print(text);
 }
@@ -129,7 +131,7 @@ void display(float val, float units) {
   lcd.print("Speed: ");
   val = int(val*10.) /10.0;
   lcd.print(val,1);
-  if (speedUnits==MPH)
+  if (units==MPH)
     lcd.print(" MPH");
   else
     lcd.print(" KPH");

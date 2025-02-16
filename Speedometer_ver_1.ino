@@ -43,8 +43,8 @@ float constant;
 
 void setup() {
   Serial.begin(9600);
-  pinMode(leftLED,INPUT);
   pinMode(rghtLED,INPUT);
+  pinMode(leftLED,INPUT);
   state = ST_READY;
   display("Ready...");
 
@@ -70,16 +70,6 @@ int newState=state;
       }
       break;
 
-    case ST_WAITING:
-      // force delay of 2 seconds
-      if (millis()-timerStart<2000) return;
-
-      if (!detected(leftLED) && !detected(rghtLED)) {
-        newState = ST_READY;
-        display("Ready...");
-      }
-      break;
-
     case ST_DETECT_LB:
       if (detected(leftLED)) {
         elapsedTime = millis() - timerStart;
@@ -95,6 +85,7 @@ int newState=state;
       break;
 
     case ST_CALC:
+      {
       display("Calculating...");
       float speed = constant / (elapsedTime / 1000. / 3600.);
       display(speed,speedUnits);
@@ -102,7 +93,18 @@ int newState=state;
       display("Waiting...");
       timerStart = millis();
       break;
-  }
+      }
+  
+    case ST_WAITING:
+      // force delay of 2 seconds
+      if (millis()-timerStart<2000) return;
+
+      if (!detected(leftLED) && !detected(rghtLED)) {
+        newState = ST_READY;
+        display("Ready...");
+      }
+      break;
+}
   state = newState;
 }
 
@@ -110,14 +112,14 @@ boolean detected(unsigned pin) {
   return (analogRead(pin)<500);
 }
 
-void display(char* text) {
+void display(const char* text) {
   Serial.println(text);
 }
 
 void display(float speed, float units) {
   Serial.print("Speed: ");
   Serial.print(speed,1);
-  if (speedUnits==MPH)
+  if (units==MPH)
     Serial.println(" MPH");
   else
     Serial.println(" KPH");

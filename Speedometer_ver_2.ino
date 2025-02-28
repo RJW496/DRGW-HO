@@ -20,8 +20,8 @@ float speedUnits = MPH;       // select MPH or KPH
 
 #define INCHES  1
 #define CM      2
-float distance = 13.7;        // enter distance between sensors
-int distUnits = CM;           // select INCHES or CM
+float distance = 8.0;         // enter distance between sensors
+int distUnits = INCHES;       // select INCHES or CM
 
 //=========== End Customization ===============================
 
@@ -43,16 +43,15 @@ float constant;
 
 // the following lines set up the LCD display
 #include <LiquidCrystal.h>
-// Arduino pin assignments
+// Arduino pin assignment
 const int rs=12, en=11, d4=5, d5=4, d6=3, d7=2;
-LiquidCrystal lcd(rs, en, d4, d5, d6, d7);
+LiquidCrystal lcd(rs,en,d4,d5,d6,d7);
 
 void setup() {
-  delay(1000);
-  lcd.begin(16, 2);
+  lcd.begin(16,2);
   lcd.clear();
-  pinMode(leftLED,INPUT);
   pinMode(rghtLED,INPUT);
+  pinMode(leftLED,INPUT);
   state = ST_READY;
   display("Ready...");
 
@@ -102,18 +101,17 @@ int newState=state;
       timerStart = millis();
       break;
       }
-
+  
     case ST_WAITING:
-      // for delay of five seconds
-      if (millis()-timerStart<5000) return;
+      // force delay of 2 seconds
+      if (millis()-timerStart<2000) return;
 
       if (!detected(leftLED) && !detected(rghtLED)) {
         newState = ST_READY;
         display("Ready...");
-        clearLine(1);
       }
       break;
-  }
+}
   state = newState;
 }
 
@@ -122,15 +120,14 @@ boolean detected(unsigned pin) {
 }
 
 void display(const char* text) {
-  clearLine(0);
+  clearLine(1);
   lcd.print(text);
 }
 
-void display(float val, float units) {
-  clearLine(1);
+void display(float speed, float units) {
+  clearLine(0);
   lcd.print("Speed: ");
-  val = int(val*10.) /10.0;
-  lcd.print(val,1);
+  lcd.print(speed,1);
   if (units==MPH)
     lcd.print(" MPH");
   else
